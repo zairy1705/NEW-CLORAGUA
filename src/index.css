@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Plus Jakarta Sans', sans-serif;
+    --font-hud: 'Space Grotesk', sans-serif;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #008ba3;
+    color: #151d22;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+}
+
+.font-hud {
+  font-family: 'Space Grotesk', monospace, sans-serif;
+}
+
+.font-body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.pb-safe {
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+}
+
+.pt-safe {
+  padding-top: max(12px, env(safe-area-inset-top, 12px));
+}
+
+/* Custom scrollbar hiding */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Character waving animations */
+@keyframes handWaveIdle {
+  0% { transform: rotate(-8deg) translateY(0px); }
+  50% { transform: rotate(14deg) translateY(-2px); }
+  100% { transform: rotate(-8deg) translateY(0px); }
+}
+
+@keyframes handWaveFast {
+  0% { transform: rotate(-16deg) translateY(0px); }
+  25% { transform: rotate(18deg) translateY(-3px); }
+  50% { transform: rotate(-14deg) translateY(0px); }
+  75% { transform: rotate(16deg) translateY(-3px); }
+  100% { transform: rotate(-16deg) translateY(0px); }
+}
+
+.animate-hand-wave-idle {
+  animation: handWaveIdle 2.4s ease-in-out infinite alternate;
+}
+
+.animate-hand-wave-fast {
+  animation: handWaveFast 0.6s ease-in-out infinite alternate;
+}
+
+/* =========================================================================
+   VIDEO GAME HOVER COLOR CHANGE & TACTILE BUTTON STATES
+   All buttons react dynamically with vibrant color shifts and arcade polish
+   ========================================================================= */
+
+button,
+[role="button"],
+.btn,
+input[type="button"],
+input[type="submit"] {
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, filter, box-shadow, background-color;
+  cursor: pointer;
+}
+
+/* Dynamic color transformation when hovering over ANY button */
+button:hover:not(:disabled),
+[role="button"]:hover:not([aria-disabled="true"]),
+.btn:hover:not(:disabled),
+input[type="button"]:hover:not(:disabled),
+input[type="submit"]:hover:not(:disabled) {
+  /* Vibrant color boost: brightens and saturates the button colors */
+  filter: brightness(1.2) saturate(1.35) contrast(1.06);
+  /* Energetic videogame aura glow */
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.6), 0 4px 14px rgba(0, 103, 125, 0.35);
+  /* Snappy physical hover lift */
+  transform: translateY(-2.5px) scale(1.03);
+}
+
+/* Special color shift for light/neutral buttons when hovered */
+button.bg-white:hover:not(:disabled),
+button.bg-white\/90:hover:not(:disabled),
+button.bg-white\/80:hover:not(:disabled),
+button.bg-\[\#edf5fc\]:hover:not(:disabled),
+[role="button"].bg-white:hover:not([aria-disabled="true"]) {
+  background-color: #e0f7fc !important;
+  color: #004e5f !important;
+  border-color: #00b4d8 !important;
+}
+
+/* Special color shift for dark/cyan buttons when hovered */
+button.bg-\[\#00677d\]:hover:not(:disabled),
+button.bg-\[\#004e5f\]:hover:not(:disabled),
+button.bg-black\/60:hover:not(:disabled),
+button.bg-black\/75:hover:not(:disabled) {
+  background-color: #008ba3 !important;
+  border-color: #10e7b2 !important;
+}
+
+/* Responsive tactile click feedback (Arcade press) */
+button:active:not(:disabled),
+[role="button"]:active:not([aria-disabled="true"]),
+.btn:active:not(:disabled),
+input[type="button"]:active:not(:disabled),
+input[type="submit"]:active:not(:disabled) {
+  transform: translateY(1.5px) scale(0.95);
+  filter: brightness(0.92);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* Animated Hair Dynamics & Laboratory Atmosphere */
+@keyframes hairWaveLeft {
+  0% {
+    transform: rotate(0deg) skewX(0deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(2.2deg) skewX(1.8deg) translateY(-2px);
+  }
+  50% {
+    transform: rotate(3.6deg) skewX(2.6deg) translateY(-3.5px);
+  }
+  75% {
+    transform: rotate(1.6deg) skewX(1deg) translateY(-1.5px);
+  }
+  100% {
+    transform: rotate(0deg) skewX(0deg) translateY(0px);
+  }
+}
+
+@keyframes hairWaveRight {
+  0% {
+    transform: rotate(0deg) skewX(0deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(-2.4deg) skewX(-1.8deg) translateY(-2px);
+  }
+  50% {
+    transform: rotate(-3.8deg) skewX(-2.8deg) translateY(-3.5px);
+  }
+  75% {
+    transform: rotate(-1.8deg) skewX(-1.2deg) translateY(-1.5px);
+  }
+  100% {
+    transform: rotate(0deg) skewX(0deg) translateY(0px);
+  }
+}
+
+@keyframes hairBreezePuffLeft {
+  0% { transform: rotate(0deg) skewX(0deg) translateY(0); }
+  30% { transform: rotate(5.5deg) skewX(4deg) translateY(-5px) scale(1.02); }
+  60% { transform: rotate(-2deg) skewX(-1deg) translateY(-1px); }
+  100% { transform: rotate(0deg) skewX(0deg) translateY(0); }
+}
+
+@keyframes hairBreezePuffRight {
+  0% { transform: rotate(0deg) skewX(0deg) translateY(0); }
+  30% { transform: rotate(-6deg) skewX(-4.5deg) translateY(-5px) scale(1.02); }
+  60% { transform: rotate(2.5deg) skewX(1.2deg) translateY(-1px); }
+  100% { transform: rotate(0deg) skewX(0deg) translateY(0); }
+}
+
+@keyframes scientistBreath {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-2.5px) scale(1.004);
+  }
+}
+
+.animate-hair-left {
+  animation: hairWaveLeft 4.8s ease-in-out infinite;
+  transform-origin: 43% 5%;
+}
+
+.animate-hair-right {
+  animation: hairWaveRight 5.4s ease-in-out infinite;
+  transform-origin: 58% 5%;
+}
+
+.animate-hair-puff-left {
+  animation: hairBreezePuffLeft 2.4s ease-out;
+  transform-origin: 43% 5%;
+}
+
+.animate-hair-puff-right {
+  animation: hairBreezePuffRight 2.4s ease-out;
+  transform-origin: 58% 5%;
+}
+
+.animate-scientist-breath {
+  animation: scientistBreath 4.6s ease-in-out infinite;
+}
+
+/* Ensure accessible and stylish arcade focus ring */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #10e7b2 !important;
+  outline-offset: 2px;
+}
+
+
+
+

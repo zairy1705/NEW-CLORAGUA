@@ -1,0 +1,8 @@
+{
+  "name": "CLORAGUA",
+  "description": "Calculadora y asistente técnico para la dosificación y control del cloro en agua para consumo humano (D.S. N.° 031-2010-SA - MINSA/DIGESA).",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
