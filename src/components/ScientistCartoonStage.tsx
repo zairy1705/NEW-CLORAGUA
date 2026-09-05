@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 
 export type ScientistSceneKey = 'photometer' | 'purification' | 'greeting' | 'cartoon_classic';
 
@@ -656,7 +655,7 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
       <div
         ref={containerRef}
         onClick={handleStageClick}
-        className={`relative w-full ${className ? className : 'min-h-[440px] sm:min-h-[520px] md:min-h-[600px] max-h-[700px]'} overflow-hidden select-none cursor-pointer bg-[#00141a] rounded-3xl flex items-center justify-center`}
+        className={`relative w-full min-h-[460px] sm:min-h-[560px] md:min-h-[640px] max-h-[720px] overflow-hidden select-none cursor-pointer bg-[#00141a] rounded-3xl flex items-center justify-center ${className}`}
         title="¡Toca el cabello para sentir la brisa, el fotómetro para medir o los equipos para hacer burbujas!"
       >
         {/* A. Ambient Blurred Laboratory Backdrop Extension (Fills wide aspect ratios gracefully without black bars) */}
@@ -964,94 +963,92 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
       </div>
 
       {/* 6. FULLSCREEN HIGH-DEFINITION CARTOON MODAL (For viewing 100% full scale on any screen) */}
-      {isFullscreenModal &&
-        createPortal(
+      {isFullscreenModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in"
+          onClick={() => setIsFullscreenModal(false)}
+        >
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in"
-            onClick={() => setIsFullscreenModal(false)}
+            className="relative bg-[#00141a] rounded-3xl overflow-hidden border border-cyan-400/40 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col items-center justify-center text-white p-2"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="relative bg-[#00141a] rounded-3xl overflow-hidden border border-cyan-400/40 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col items-center justify-center text-white p-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="w-full flex items-center justify-between p-3 border-b border-cyan-900/50">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#10e7b2] animate-ping" />
-                  <span className="font-hud text-[13px] font-extrabold text-cyan-300 uppercase">
-                    {sceneConfig.title} • Vista Completa 100%
-                  </span>
-                </div>
+            {/* Modal Header */}
+            <div className="w-full flex items-center justify-between p-3 border-b border-cyan-900/50">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10e7b2] animate-ping" />
+                <span className="font-hud text-[13px] font-extrabold text-cyan-300 uppercase">
+                  {sceneConfig.title} • Vista Completa 100%
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFullscreenModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            {/* Modal Image Display */}
+            <div className="relative w-full max-w-2xl aspect-square flex items-center justify-center my-auto overflow-hidden">
+              <img
+                src={sceneConfig.image}
+                alt={sceneConfig.title}
+                className="w-full h-full object-contain object-center filter brightness-100"
+              />
+
+              {/* Overlaid Animated Hair in Modal */}
+              {selectedScene === 'photometer' && (
+                <>
+                  <div
+                    className="absolute inset-0 w-full h-full pointer-events-none animate-hair-left"
+                    style={{ filter: 'url(#scientistHairFlow)' }}
+                  >
+                    <img
+                      src="/cloragua_hair_left.png"
+                      alt="Cabello animado"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div
+                    className="absolute inset-0 w-full h-full pointer-events-none animate-hair-right"
+                    style={{ filter: 'url(#scientistHairFlow)' }}
+                  >
+                    <img
+                      src="/cloragua_hair_right.png"
+                      alt="Cabello animado"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="w-full p-3 border-t border-cyan-900/50 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[12px] text-cyan-100/90 font-medium">
+                Ilustración de alta fidelidad: Científica Oficial CLORAGUA con cabello animado y burbujeo en equipos.
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleTriggerHairBreeze}
+                  className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#00141a] font-hud text-[11px] font-bold cursor-pointer"
+                >
+                  Brisa en Cabello
+                </button>
                 <button
                   type="button"
                   onClick={() => setIsFullscreenModal(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors"
+                  className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-hud text-[11px] font-bold cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  Cerrar
                 </button>
               </div>
-
-              {/* Modal Image Display */}
-              <div className="relative w-full max-w-2xl aspect-square flex items-center justify-center my-auto overflow-hidden">
-                <img
-                  src={sceneConfig.image}
-                  alt={sceneConfig.title}
-                  className="w-full h-full object-contain object-center filter brightness-100"
-                />
-
-                {/* Overlaid Animated Hair in Modal */}
-                {selectedScene === 'photometer' && (
-                  <>
-                    <div
-                      className="absolute inset-0 w-full h-full pointer-events-none animate-hair-left"
-                      style={{ filter: 'url(#scientistHairFlow)' }}
-                    >
-                      <img
-                        src="/cloragua_hair_left.png"
-                        alt="Cabello animado"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <div
-                      className="absolute inset-0 w-full h-full pointer-events-none animate-hair-right"
-                      style={{ filter: 'url(#scientistHairFlow)' }}
-                    >
-                      <img
-                        src="/cloragua_hair_right.png"
-                        alt="Cabello animado"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Modal Footer Controls */}
-              <div className="w-full p-3 border-t border-cyan-900/50 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[12px] text-cyan-100/90 font-medium">
-                  Ilustración de alta fidelidad: Científica Oficial CLORAGUA con cabello animado y burbujeo en equipos.
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleTriggerHairBreeze}
-                    className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#00141a] font-hud text-[11px] font-bold cursor-pointer"
-                  >
-                    Brisa en Cabello
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsFullscreenModal(false)}
-                    className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-hud text-[11px] font-bold cursor-pointer"
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
             </div>
-          </div>,
-          document.body
-        )}
+          </div>
+        </div>
+      )}
     </>
   );
 };

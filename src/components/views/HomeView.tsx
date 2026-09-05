@@ -3,7 +3,6 @@ import { WaterSystem, UserGuardianProfile, SurveillanceRecord, UserProfileAccoun
 import { MainTab } from '../BottomNavigation';
 import { ScientistCartoonStage } from '../ScientistCartoonStage';
 import { ShowcaseCardAnimation } from '../ShowcaseCardAnimation';
-import { ScientistImageModal, ScientistImageModalData } from '../modals/ScientistImageModal';
 
 interface HomeViewProps {
   systems: WaterSystem[];
@@ -37,7 +36,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
   const [heroMode, setHeroMode] = useState<'cartoon_animation' | 'photometer' | 'purification' | 'greeting' | 'custom_video'>('photometer');
-  const [selectedImageModal, setSelectedImageModal] = useState<ScientistImageModalData | null>(null);
+  const [selectedImageModal, setSelectedImageModal] = useState<{
+    title: string;
+    subtitle: string;
+    desc: string;
+    url: string;
+    badge: string;
+    modeKey: 'photometer' | 'purification' | 'greeting';
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -879,15 +885,78 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* 6. FULL-SCREEN IMAGE LIGHTBOX MODAL WITH 100% UNCLIPPED IMAGE & BUBBLE LOOP */}
-      <ScientistImageModal
-        data={selectedImageModal}
-        onClose={() => setSelectedImageModal(null)}
-        onSetBanner={(mode) => {
-          setHeroMode(mode);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+      {/* 6. FULL-SCREEN IMAGE LIGHTBOX MODAL */}
+      {selectedImageModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in"
+          onClick={() => setSelectedImageModal(null)}
+        >
+          <div
+            className="relative bg-white rounded-3xl overflow-hidden shadow-2xl border border-cyan-200/50 max-w-2xl w-full flex flex-col animate-in zoom-in-95 text-[#151d22]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Interactive Cartoon Stage with Loop & Bubbles */}
+            <div className="relative w-full aspect-square max-h-[64vh] bg-[#00141a] overflow-hidden flex items-center justify-center">
+              <ScientistCartoonStage
+                activeSceneKey={selectedImageModal.modeKey}
+                className="w-full h-full min-h-[380px] sm:min-h-[480px]"
+              />
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setSelectedImageModal(null)}
+                className="absolute top-3 right-3 z-30 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-md border border-white/20"
+                aria-label="Cerrar modal"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            {/* Modal Content & Actions */}
+            <div className="p-5 flex flex-col gap-4 bg-white">
+              <p className="text-[13px] text-[#3d494d] leading-relaxed">
+                {selectedImageModal.desc}
+              </p>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeroMode(selectedImageModal.modeKey);
+                      setSelectedImageModal(null);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#00677d] text-white font-hud text-[11px] font-extrabold uppercase flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">view_carousel</span>
+                    <span>Colocar en Banner Principal</span>
+                  </button>
+                  <a
+                    href={selectedImageModal.url}
+                    download
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-hud text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">download</span>
+                    <span>Descargar</span>
+                  </a>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedImageModal(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-hud text-[11px] font-bold cursor-pointer transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
