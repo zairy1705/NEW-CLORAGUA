@@ -4,6 +4,7 @@ import { MainTab } from '../BottomNavigation';
 import { ScientistCartoonStage } from '../ScientistCartoonStage';
 import { ShowcaseCardAnimation } from '../ShowcaseCardAnimation';
 import { ScientistImageModal, ScientistImageModalData } from '../modals/ScientistImageModal';
+import { TropicalBgmPlayer } from '../TropicalBgmPlayer';
 
 interface HomeViewProps {
   systems: WaterSystem[];
@@ -17,6 +18,7 @@ interface HomeViewProps {
   onOpenSolutionPrep: () => void;
   onOpenProfileAuth?: (tab?: 'register' | 'login' | 'saved' | 'profile') => void;
   onAddNewSystem?: () => void;
+  onOpenDpdCamera?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -31,6 +33,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onOpenSolutionPrep,
   onOpenProfileAuth,
   onAddNewSystem,
+  onOpenDpdCamera,
 }) => {
   // Video & Water hero state
   const [isPlaying, setIsPlaying] = useState(true);
@@ -152,6 +155,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             }}
             onSplashRequest={triggerHeroWaterSplash}
             onOpenDosage={() => onNavigateTab('dosis')}
+            onOpenDpdCamera={onOpenDpdCamera}
             className="w-full"
           />
         )}
@@ -175,7 +179,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center flex-wrap gap-2 w-full sm:w-auto">
+            {onOpenDpdCamera && (
+              <button
+                onClick={onOpenDpdCamera}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-200 border border-cyan-400/50 font-hud text-[12px] font-extrabold uppercase shadow-sm active:scale-95 transition-all cursor-pointer"
+                type="button"
+                title="Abrir Cámara Escáner DPD"
+              >
+                <span className="material-symbols-outlined text-[18px] text-[#10e7b2]">photo_camera</span>
+                <span>Escanear con Cámara DPD</span>
+              </button>
+            )}
             <button
               onClick={() => onNavigateTab('dosis')}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] hover:opacity-95 text-[#002116] font-hud text-[12px] font-extrabold uppercase shadow-[0_4px_16px_rgba(0,180,216,0.35)] active:scale-95 transition-all cursor-pointer"
@@ -219,7 +234,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
+        <div className="flex items-center gap-2 shrink-0 w-full md:w-auto flex-wrap">
+          {onOpenDpdCamera && (
+            <button
+              onClick={onOpenDpdCamera}
+              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] text-[#00212b] font-hud text-[11px] font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95 hover:opacity-95"
+              type="button"
+              title="Abrir escáner con cámara para fotómetro DPD"
+            >
+              <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+              <span>Cámara DPD</span>
+            </button>
+          )}
           <button
             onClick={() => onOpenSolutionPrep()}
             className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-cyan-50/80 text-[#00677d] border border-cyan-200 font-hud text-[11px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
@@ -237,6 +263,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <span>Calibrar Gotero</span>
           </button>
         </div>
+      </section>
+
+      {/* TROPICAL BGM SYNTHESIZER (WEB AUDIO EN TIEMPO REAL) */}
+      <section className="w-full">
+        <TropicalBgmPlayer />
       </section>
 
       {/* 3 IMAGES SHOWCASE: LABORATORIO & OPERACIONES DE LA CIENTÍFICA CLORAGUA */}
@@ -479,7 +510,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 {activeAccount?.roleLabel || 'Operador JASS'}
               </span>
               <span className="text-[11px] font-hud font-bold text-[#00677d]">
-                LV.{guardian.level} • {guardian.currentXp} XP
+                {activeAccount?.dni ? `DNI: ${activeAccount.dni}` : guardian.title}
               </span>
             </div>
             <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">

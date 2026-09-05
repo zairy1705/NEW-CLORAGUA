@@ -433,8 +433,9 @@ export const RecordsView: React.FC<RecordsViewProps> = ({ records, onOpenNormati
                     </span>
                     <span>{copiedId === r.id ? 'Copiado' : 'Copiar'}</span>
                   </button>
-                  <span className="font-hud text-[10px] text-[#006c51] font-bold">
-                    +{r.xpEarned} XP
+                  <span className="font-hud text-[10px] text-[#006c51] font-bold flex items-center gap-0.5">
+                    <span className="material-symbols-outlined text-[13px]">verified</span>
+                    Oficial
                   </span>
                 </div>
               </div>

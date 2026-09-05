@@ -1350,18 +1350,14 @@ export const DosifierWizardView: React.FC<DosifierWizardViewProps> = ({
             </div>
           )}
 
-          {/* Primary Gamified Action Button with Floating XP Reward Badge matching Image 1 */}
+          {/* Primary Action Button */}
           <button
             onClick={handleApplyDoseAndRegister}
-            className="relative w-full py-4 px-6 rounded-full bg-gradient-to-r from-[#00b4d8] via-[#00677d] to-[#004e5f] text-white font-hud text-[14px] font-bold uppercase tracking-wider shadow-[0_12px_28px_rgba(0,180,216,0.35)] active:scale-95 transition-all overflow-hidden flex items-center justify-center gap-2 group cursor-pointer"
+            className="w-full py-4 px-6 rounded-full bg-gradient-to-r from-[#00b4d8] via-[#00677d] to-[#004e5f] text-white font-hud text-[14px] font-bold uppercase tracking-wider shadow-[0_12px_28px_rgba(0,180,216,0.35)] active:scale-95 transition-all overflow-hidden flex items-center justify-center gap-2 group cursor-pointer"
             type="button"
           >
             <span className="material-symbols-outlined text-[20px]">science_off</span>
             <span>Aplicar Dosis y Pasar a Verificación en Campo</span>
-            <span className="absolute right-3.5 top-2.5 bg-[#caf300] text-[#171e00] font-hud text-[10px] px-2.5 py-0.5 rounded-full font-extrabold shadow-sm flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-[12px]">bolt</span>
-              +50 XP
-            </span>
           </button>
 
           {/* Safety Card matching Image 1 */}
@@ -1607,7 +1603,7 @@ export const DosifierWizardView: React.FC<DosifierWizardViewProps> = ({
               <span className="material-symbols-outlined text-[20px]">
                 {hasRegistered ? 'task_alt' : 'save'}
               </span>
-              <span>{hasRegistered ? '¡Evento Registrado!' : 'Confirmar y Guardar en Bitácora (+50 XP)'}</span>
+              <span>{hasRegistered ? '¡Evento Registrado!' : 'Confirmar y Guardar en Bitácora'}</span>
             </button>
           </div>
         </div>

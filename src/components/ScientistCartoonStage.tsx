@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { toggleBgm, isBgmActive, subscribeBgmState } from '../utils/tropicalBgmSynthesizer';
 
 export type ScientistSceneKey = 'photometer' | 'purification' | 'greeting' | 'cartoon_classic';
 
@@ -83,6 +84,7 @@ interface ScientistCartoonStageProps {
   onOpenDosage?: () => void;
   activeSceneKey?: ScientistSceneKey;
   onSceneChange?: (scene: ScientistSceneKey) => void;
+  onOpenDpdCamera?: () => void;
   className?: string;
 }
 
@@ -91,6 +93,7 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
   onOpenDosage,
   activeSceneKey = 'photometer',
   onSceneChange,
+  onOpenDpdCamera,
   className = '',
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -105,6 +108,14 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
   const [isHairBreeze, setIsHairBreeze] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isFullscreenModal, setIsFullscreenModal] = useState(false);
+  const [isBgmPlaying, setIsBgmPlaying] = useState<boolean>(() => isBgmActive());
+
+  useEffect(() => {
+    const unsub = subscribeBgmState((playing) => {
+      setIsBgmPlaying(playing);
+    });
+    return unsub;
+  }, []);
 
   // Synchronize with external activeSceneKey if provided
   useEffect(() => {
@@ -788,6 +799,44 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
 
           {/* Top Quick Actions (Sound, Density, Hair Breeze, Fullscreen) */}
           <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-md">
+            {/* Tropical Calypso BGM Quick Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleBgm();
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-hud font-bold transition-all cursor-pointer select-none ${
+                isBgmPlaying
+                  ? 'bg-gradient-to-r from-[#10e7b2] to-[#00b4d8] text-[#002116] shadow-sm font-black'
+                  : 'text-white/80 hover:text-white bg-white/10'
+              }`}
+              title={isBgmPlaying ? 'Pausar música Calypso' : 'Reproducir música tropical Calypso en vivo'}
+            >
+              <span className={`material-symbols-outlined text-[13px] ${isBgmPlaying ? 'animate-bounce text-[#002116]' : ''}`}>
+                {isBgmPlaying ? 'music_note' : 'music_off'}
+              </span>
+              <span className="hidden sm:inline">
+                {isBgmPlaying ? 'Calypso On' : 'Calypso Off'}
+              </span>
+            </button>
+
+            {/* Quick Camera DPD Scanner Button */}
+            {onOpenDpdCamera && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenDpdCamera();
+                }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-hud font-bold transition-all cursor-pointer select-none bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] hover:opacity-95 text-[#00212b] shadow-sm font-black active:scale-95"
+                title="Abrir Cámara Escáner DPD (Fotómetro en Vivo)"
+              >
+                <span className="material-symbols-outlined text-[13px]">photo_camera</span>
+                <span className="hidden sm:inline">Cámara DPD</span>
+              </button>
+            )}
+
             {/* Audio Toggle */}
             <button
               type="button"

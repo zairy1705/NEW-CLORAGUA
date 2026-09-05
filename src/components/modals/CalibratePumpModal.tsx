@@ -216,7 +216,7 @@ export const CalibratePumpModal: React.FC<CalibratePumpModalProps> = ({
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">save</span>
-            <span>Confirmar Calibración (+40 XP)</span>
+            <span>Confirmar Calibración</span>
           </button>
         </div>
       </div>

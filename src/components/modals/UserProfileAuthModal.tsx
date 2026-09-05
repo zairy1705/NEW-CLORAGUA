@@ -346,7 +346,7 @@ export const UserProfileAuthModal: React.FC<UserProfileAuthModalProps> = ({
                   info
                 </span>
                 <p className="text-[12px] text-[#004e5f] leading-relaxed">
-                  Registra tu perfil con <strong>correo institucional o personal y contraseña</strong>. Podrás guardar tus bitácoras de vigilancia, acumular experiencia (XP) y asociar tus sistemas de agua.
+                  Registra tu perfil con <strong>correo institucional o personal y contraseña</strong>. Podrás guardar tus bitácoras de vigilancia, firmar reportes oficiales y asociar tus sistemas de agua.
                 </p>
               </div>
 
@@ -678,7 +678,7 @@ export const UserProfileAuthModal: React.FC<UserProfileAuthModalProps> = ({
                             {acc.roleLabel} • {acc.organization}
                           </span>
                           <span className="text-[11px] text-slate-500">
-                            {acc.email} • LV.{acc.guardian.level} ({acc.guardian.currentXp} XP)
+                            {acc.email} • DNI: {acc.dni || 'Registrado'}
                           </span>
                         </div>
                       </div>
@@ -743,9 +743,9 @@ export const UserProfileAuthModal: React.FC<UserProfileAuthModalProps> = ({
                     {activeAccount.email} • {activeAccount.organization}
                   </div>
                   <div className="flex items-center justify-center sm:justify-start gap-3 mt-2 text-[11px] font-hud text-cyan-300">
-                    <span>Nivel {activeAccount.guardian.level}: {activeAccount.guardian.title}</span>
+                    <span>{activeAccount.guardian.title}</span>
                     <span>•</span>
-                    <span>{activeAccount.guardian.currentXp} XP Acumulados</span>
+                    <span>DNI: {activeAccount.dni || '72948102'}</span>
                   </div>
                 </div>
               </div>

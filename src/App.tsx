@@ -29,6 +29,7 @@ import { CalibratePumpModal } from './components/modals/CalibratePumpModal';
 import { SolutionPrepModal } from './components/modals/SolutionPrepModal';
 import { SystemFormModal } from './components/modals/SystemFormModal';
 import { UserProfileAuthModal } from './components/modals/UserProfileAuthModal';
+import { CameraDpdScanModal } from './components/modals/CameraDpdScanModal';
 import { InteractiveWaterEngine } from './components/InteractiveWaterEngine';
 import confetti from 'canvas-confetti';
 
@@ -82,6 +83,7 @@ export default function App() {
   const [isSystemFormOpen, setIsSystemFormOpen] = useState<boolean>(false);
   const [systemFormMode, setSystemFormMode] = useState<'create' | 'edit'>('create');
   const [systemToEdit, setSystemToEdit] = useState<WaterSystem | null>(null);
+  const [isCameraScanOpen, setIsCameraScanOpen] = useState<boolean>(false);
 
   // Handle active account changes (Registration, Login, Switch)
   const handleAccountChange = (newAccount: UserProfileAccount) => {
@@ -217,6 +219,50 @@ export default function App() {
     }
   };
 
+  const handleApplyCameraReading = (ppm: number, _photoDataUrl?: string) => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const timeStr = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    const status =
+      ppm >= normative.minFreeChlorine && ppm <= normative.maxFreeChlorine
+        ? 'optimal'
+        : ppm < normative.minFreeChlorine
+        ? 'danger'
+        : 'warning';
+
+    handleSaveRecord({
+      systemId: activeSystem.id,
+      systemName: activeSystem.name,
+      centerPoblado: activeSystem.centerPoblado,
+      measurementPoint: 'Salida de Reservorio / Celda Fotométrica DPD',
+      volumeLiters: activeSystem.currentVolumeLiters,
+      productName: 'Hipoclorito de Calcio 70%',
+      concentrationPercent: 70,
+      initialChlorinePpm: activeSystem.lastChlorinePpm,
+      targetChlorinePpm: ppm,
+      postChlorinePpm: ppm,
+      calculatedDoseValue: 0,
+      calculatedDoseUnit: 'g',
+      contactTimeMinutes: 30,
+      status,
+      ph: 7.2,
+      turbidityNtu: 1.1,
+      responsible: activeAccount?.fullName || guardian.name || 'Operador en Turno',
+      observations: `Medición analizada y capturada mediante Escáner Óptico de Cámara DPD (${ppm.toFixed(2)} ppm Cl₂ libre residual).`,
+      xpEarned: 50,
+      isAudited: true,
+      dateStr,
+      timeStr,
+    });
+    handleRewardXp(50, 'Escaneo DPD con Cámara Registrado');
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.5 },
+      colors: ['#00b4d8', '#10e7b2', '#ff4081', '#caf300'],
+    });
+  };
+
   return (
     <div className="min-h-screen bg-transparent text-[#151d22] flex flex-col font-sans selection:bg-[#00b4d8] selection:text-white relative overflow-x-hidden">
       {/* 0. Realtime Interactive Water Engine (Active across all pages) */}
@@ -244,6 +290,7 @@ export default function App() {
         onOpenSolutionPrep={() => setIsSolutionPrepOpen(true)}
         onOpenVolumeCalc={() => setCurrentTab('dosis')}
         onNavigateHome={() => setCurrentTab('inicio')}
+        onOpenDpdCamera={() => setIsCameraScanOpen(true)}
       />
 
       {/* Main View Area */}
@@ -264,6 +311,7 @@ export default function App() {
             onOpenSolutionPrep={() => setIsSolutionPrepOpen(true)}
             onOpenProfileAuth={handleOpenProfileAuth}
             onAddNewSystem={handleOpenCreateSystem}
+            onOpenDpdCamera={() => setIsCameraScanOpen(true)}
           />
         )}
 
@@ -351,6 +399,12 @@ export default function App() {
         activeAccount={activeAccount}
         onAccountChange={handleAccountChange}
         initialTab={profileAuthInitialTab}
+      />
+      <CameraDpdScanModal
+        isOpen={isCameraScanOpen}
+        onClose={() => setIsCameraScanOpen(false)}
+        onApplyReading={handleApplyCameraReading}
+        systemName={activeSystem.name}
       />
     </div>
   );

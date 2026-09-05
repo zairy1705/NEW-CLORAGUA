@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserGuardianProfile, UserProfileAccount } from '../types';
 import { gameSoundEngine } from '../utils/gameAudio';
+import { TropicalBgmPlayer } from './TropicalBgmPlayer';
 
 interface HeaderProps {
   currentTabTitle?: string;
@@ -13,6 +14,7 @@ interface HeaderProps {
   onOpenSolutionPrep?: () => void;
   onOpenVolumeCalc?: () => void;
   onNavigateHome?: () => void;
+  onOpenDpdCamera?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSolutionPrep,
   onOpenVolumeCalc,
   onNavigateHome,
+  onOpenDpdCamera,
 }) => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [isSoundMuted, setIsSoundMuted] = useState<boolean>(() => gameSoundEngine.getMuted());
@@ -86,13 +89,33 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <div className="flex flex-col">
               <span className="font-hud text-[9px] text-[#3d494d] uppercase leading-none font-bold truncate max-w-[120px] sm:max-w-[150px]">
-                {activeAccount?.fullName || guardian?.title || 'Guardián del Agua'}
+                {activeAccount?.fullName || guardian?.title || 'Operador del Agua'}
               </span>
-              <span className="font-hud text-[11px] sm:text-[12px] text-[#00677d] font-bold leading-none mt-0.5">
-                LV.{guardian?.level ?? 1} • {guardian?.currentXp ?? 0} XP
+              <span className="font-hud text-[11px] sm:text-[12px] text-[#00677d] font-bold leading-none mt-0.5 truncate max-w-[120px] sm:max-w-[150px]">
+                {activeAccount?.roleTitle || 'Operador DIGESA / JASS'}
               </span>
             </div>
           </button>
+
+          {/* Tropical Calypso Background Music (Web Audio Synthesizer) */}
+          <TropicalBgmPlayer compact={true} />
+
+          {/* Camera DPD Optical Scanner Button */}
+          {onOpenDpdCamera && (
+            <button
+              onClick={onOpenDpdCamera}
+              className="h-10 px-3 rounded-full border border-cyan-400/50 bg-gradient-to-r from-cyan-500/15 via-teal-500/15 to-emerald-500/15 hover:from-cyan-500/25 hover:to-emerald-500/25 text-[#00677d] flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer select-none"
+              title="Abrir Cámara Escáner DPD (Fotómetro de Cloro Libre en Vivo)"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px] text-[#00b4d8]">
+                photo_camera
+              </span>
+              <span className="font-hud text-[10px] font-extrabold uppercase tracking-wider hidden sm:inline">
+                Cámara DPD
+              </span>
+            </button>
+          )}
 
           {/* Video Game Sound Effect Toggle Button */}
           <button
@@ -224,6 +247,24 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="text-[10px] text-[#3d494d]">Dilución C₁·V₁ = C₂·V₂</div>
                   </div>
                 </button>
+                {onOpenDpdCamera && (
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenDpdCamera();
+                    }}
+                    className="w-full px-3 py-2 rounded-xl text-left text-[13px] font-medium text-[#151d22] hover:bg-[#edf5fc] flex items-center gap-2.5 transition-colors cursor-pointer"
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined text-[#00b4d8] text-[18px]">
+                      photo_camera
+                    </span>
+                    <div>
+                      <div className="font-bold text-[12px] text-[#00677d]">Cámara Escáner DPD</div>
+                      <div className="text-[10px] text-[#3d494d]">Fotómetro de cloro libre en vivo</div>
+                    </div>
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setMenuOpen(false);

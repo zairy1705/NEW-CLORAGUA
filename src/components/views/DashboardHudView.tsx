@@ -49,8 +49,8 @@ export const DashboardHudView: React.FC<DashboardHudViewProps> = ({
     else if (ppm <= 2.3) setActiveVial('2.0');
     else setActiveVial('3.5+');
 
-    onRewardXp(120, 'Captura fotográfica y análisis de celda DPD con cámara');
-    setSyncFeedback(`¡Foto de celda DPD capturada! Cloro verificado: ${ppm.toFixed(2)} ppm (+120 XP).`);
+    onRewardXp(0, 'Captura fotográfica y análisis de celda DPD con cámara');
+    setSyncFeedback(`¡Foto de celda DPD capturada! Cloro verificado: ${ppm.toFixed(2)} ppm.`);
     confetti({
       particleCount: 60,
       spread: 70,
@@ -109,8 +109,8 @@ export const DashboardHudView: React.FC<DashboardHudViewProps> = ({
     setSyncFeedback('Sincronizando con sensor fotométrico...');
     setTimeout(() => {
       setIsSyncing(false);
-      setSyncFeedback('¡Lectura verificada! +100 XP registrados en bitácora.');
-      onRewardXp(100, 'Verificación fotométrica de cloro residual');
+      setSyncFeedback('¡Lectura verificada y registrada en bitácora oficial!');
+      onRewardXp(0, 'Verificación fotométrica de cloro residual');
       confetti({
         particleCount: 50,
         spread: 60,
@@ -564,22 +564,22 @@ export const DashboardHudView: React.FC<DashboardHudViewProps> = ({
           <span className="text-[#ba1a1a]">&gt; 2.00 (Exceso)</span>
         </div>
 
-        {/* Precision Bonus XP banner */}
+        {/* Precision Verification banner */}
         <div className="mt-1 flex items-center justify-between p-2.5 rounded-xl bg-[#edf5fc] border border-[#bcc9ce]/30">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#caf300]/40 flex items-center justify-center text-[#334000]">
-              <span className="material-symbols-outlined text-[16px]">military_tech</span>
+            <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800">
+              <span className="material-symbols-outlined text-[16px]">verified</span>
             </div>
             <div className="flex flex-col">
               <span className="text-[12px] text-[#151d22] font-bold leading-none">
-                Bonificación de Calibración
+                Precisión de Calibración
               </span>
               <span className="text-[11px] text-[#3d494d]">
                 Desvío &lt; 0.02 mg/L verificado según DIGESA
               </span>
             </div>
           </div>
-          <span className="font-hud text-[13px] text-[#006c51] font-bold">+100 XP</span>
+          <span className="font-hud text-[11px] text-[#006c51] font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Conforme</span>
         </div>
       </div>
 
@@ -715,7 +715,7 @@ export const DashboardHudView: React.FC<DashboardHudViewProps> = ({
           <span>
             {isSyncing
               ? 'SINCRONIZANDO DATOS HUD...'
-              : 'CONFIRMAR LECTURA Y REGISTRAR EN BITÁCORA (+100 XP)'}
+              : 'CONFIRMAR LECTURA Y REGISTRAR EN BITÁCORA'}
           </span>
         </button>
 
@@ -769,29 +769,29 @@ export const DashboardHudView: React.FC<DashboardHudViewProps> = ({
         )}
       </div>
 
-      {/* 8. Daily Quest Card (RPG XP Reward) */}
-      <section className="bg-gradient-to-r from-[#b3ebff]/60 via-[#edf5fc] to-[#43fec7]/30 rounded-2xl p-4 shadow-sm border border-[#bcc9ce]/40 relative overflow-hidden">
+      {/* 8. Protocolo de Monitoreo Diario */}
+      <section className="bg-gradient-to-r from-[#b3ebff]/40 via-[#edf5fc] to-[#43fec7]/20 rounded-2xl p-4 shadow-sm border border-[#bcc9ce]/40 relative overflow-hidden">
         <div className="flex items-start justify-between gap-3 relative z-10">
-          <div className="w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center text-[#93b100] shrink-0">
-            <span className="material-symbols-outlined text-[26px]">military_tech</span>
+          <div className="w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center text-[#00677d] shrink-0">
+            <span className="material-symbols-outlined text-[26px]">checklist_rtl</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="font-hud text-[10px] text-[#334000] uppercase font-bold">
-                Misión Diaria • Hydro Quest
+              <span className="font-hud text-[10px] text-[#00677d] uppercase font-bold">
+                Control Periódico • D.S. 031-2010-SA
               </span>
-              <span className="bg-[#caf300] text-[#171e00] font-hud text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                +150 XP
+              <span className="bg-[#00b4d8]/15 text-[#00677d] font-hud text-[9px] px-2 py-0.5 rounded-full font-bold border border-[#00b4d8]/30">
+                Puntos Críticos
               </span>
             </div>
             <p className="text-[13px] text-[#151d22] font-semibold leading-tight">
-              Registra 3 mediciones sucesivas de cloro libre para reclamar tu recompensa de operador.
+              Cumplimiento de 3 muestreos diarios recomendados (Reservorio, Red media y Extremo de red).
             </p>
             <div className="mt-2 flex items-center gap-2">
               <div className="flex-1 h-2 bg-[#dbe4ea] rounded-full overflow-hidden">
                 <div className="h-full bg-[#006c51] rounded-full w-2/3" />
               </div>
-              <span className="font-hud text-[11px] text-[#006c51] font-bold">2/3 completadas</span>
+              <span className="font-hud text-[11px] text-[#006c51] font-bold">2/3 inspecciones realizadas</span>
             </div>
           </div>
         </div>

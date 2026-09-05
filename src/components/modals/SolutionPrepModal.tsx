@@ -204,7 +204,7 @@ export const SolutionPrepModal: React.FC<SolutionPrepModalProps> = ({
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">task_alt</span>
-            <span>Aplicar Preparación (+35 XP)</span>
+            <span>Aplicar Preparación</span>
           </button>
         </div>
       </div>
