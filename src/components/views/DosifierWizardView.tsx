@@ -4,7 +4,6 @@ import { calculateTankVolume, calculateChlorineDosage, calculateAdvancedTechnica
 import { COMMON_PRODUCTS } from '../../utils/initialData';
 import { TankVisualizer } from '../TankVisualizer';
 import confetti from 'canvas-confetti';
-import { Cylinder } from 'lucide-react';
 
 interface DosifierWizardViewProps {
   activeSystem: WaterSystem;
@@ -463,11 +462,7 @@ export const DosifierWizardView: React.FC<DosifierWizardViewProps> = ({
                       isSelected ? 'bg-[#00b4d8] text-white' : 'bg-[#edf5fc] text-[#00677d]'
                     }`}
                   >
-                    {opt.icon === 'cylinder' ? (
-                      <Cylinder className="w-5 h-5" strokeWidth={2.2} />
-                    ) : (
-                      <span className="material-symbols-outlined text-[20px]">{opt.icon}</span>
-                    )}
+                    <span className="material-symbols-outlined text-[20px]">{opt.icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-[13px] text-[#151d22]">{opt.title}</div>
