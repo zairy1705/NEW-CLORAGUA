@@ -2,19 +2,30 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { toggleBgm, isBgmActive, subscribeBgmState } from '../utils/tropicalBgmSynthesizer';
 
-export type ScientistSceneKey = 'photometer' | 'purification' | 'greeting' | 'cartoon_classic';
+export type ScientistSceneKey = 'animated_scientist' | 'photometer' | 'purification' | 'greeting' | 'cartoon_classic';
 
 export interface SceneConfig {
   key: ScientistSceneKey;
   title: string;
   subtitle: string;
   image: string;
+  video?: string;
   aspect: 'square' | 'wide';
   badge: string;
   speechText: string;
 }
 
 export const SCIENTIST_SCENES: Record<ScientistSceneKey, SceneConfig> = {
+  animated_scientist: {
+    key: 'animated_scientist',
+    title: 'Científica Principal CLORAGUA',
+    subtitle: 'Agua segura, comunidades más saludables',
+    image: '/cloragua_scientist_animated_poster.jpg',
+    video: '/cloragua_scientist_animated.mp4',
+    aspect: 'wide',
+    badge: 'ANIMACIÓN OFICIAL',
+    speechText: '«¡Hola! Soy la Científica de CLORAGUA. Te acompaño en la dosificación de hipoclorito, el control fotométrico de cloro libre residual y la vigilancia de calidad del agua para garantizar salud en tu comunidad.»',
+  },
   photometer: {
     key: 'photometer',
     title: 'Medición Fotométrica & Reactivo DPD',
@@ -91,7 +102,7 @@ interface ScientistCartoonStageProps {
 export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
   onSplashRequest,
   onOpenDosage,
-  activeSceneKey = 'photometer',
+  activeSceneKey = 'animated_scientist',
   onSceneChange,
   onOpenDpdCamera,
   className = '',
@@ -681,15 +692,30 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#00141a] via-transparent to-[#00141a]/40 z-0 pointer-events-none" />
 
-        {/* B. Center Stage: Displaying the FULL CARTOON IMAGE (100% height and width framed without cropping) */}
-        <div className="relative z-1 h-full w-full max-w-2xl aspect-square flex items-center justify-center animate-scientist-breath">
-          {/* Base Character & Laboratory Image */}
-          <img
-            src={sceneConfig.image}
-            alt={sceneConfig.title}
-            className="w-full h-full object-contain object-center filter brightness-100 drop-shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
-            referrerPolicy="no-referrer"
-          />
+        {/* B. Center Stage: Displaying the FULL ANIMATED SCIENTIST VIDEO OR CARTOON (100% height and width framed without cropping) */}
+        <div className={`relative z-1 h-full w-full ${sceneConfig.aspect === 'wide' ? 'max-w-4xl aspect-video' : 'max-w-2xl aspect-square'} flex items-center justify-center ${selectedScene === 'animated_scientist' ? '' : 'animate-scientist-breath'}`}>
+          {sceneConfig.video ? (
+            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.6)] border border-cyan-500/30 bg-black flex items-center justify-center">
+              <video
+                src={sceneConfig.video}
+                poster={sceneConfig.image}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover sm:object-contain object-center filter brightness-105"
+              />
+              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#00141a]/40 via-transparent to-transparent" />
+            </div>
+          ) : (
+            /* Base Character & Laboratory Image */
+            <img
+              src={sceneConfig.image}
+              alt={sceneConfig.title}
+              className="w-full h-full object-contain object-center filter brightness-100 drop-shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
+              referrerPolicy="no-referrer"
+            />
+          )}
 
           {/* C. ANIMATED HAIR LAYERS (Specifically for the Photometer Chemist Cartoon) */}
           {selectedScene === 'photometer' && (
@@ -982,7 +1008,9 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
                   title={sc.title}
                 >
                   <span className="material-symbols-outlined text-[13px]">
-                    {key === 'photometer'
+                    {key === 'animated_scientist'
+                      ? 'movie'
+                      : key === 'photometer'
                       ? 'biotech'
                       : key === 'purification'
                       ? 'water'
@@ -1040,13 +1068,26 @@ export const ScientistCartoonStage: React.FC<ScientistCartoonStageProps> = ({
                 </button>
               </div>
 
-              {/* Modal Image Display */}
-              <div className="relative w-full max-w-2xl aspect-square flex items-center justify-center my-auto overflow-hidden">
-                <img
-                  src={sceneConfig.image}
-                  alt={sceneConfig.title}
-                  className="w-full h-full object-contain object-center filter brightness-100"
-                />
+              {/* Modal Media Display */}
+              <div className={`relative w-full ${sceneConfig.aspect === 'wide' ? 'max-w-4xl aspect-video' : 'max-w-2xl aspect-square'} flex items-center justify-center my-auto overflow-hidden rounded-2xl bg-black`}>
+                {sceneConfig.video ? (
+                  <video
+                    src={sceneConfig.video}
+                    poster={sceneConfig.image}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    controls
+                    className="w-full h-full object-contain object-center filter brightness-105"
+                  />
+                ) : (
+                  <img
+                    src={sceneConfig.image}
+                    alt={sceneConfig.title}
+                    className="w-full h-full object-contain object-center filter brightness-100"
+                  />
+                )}
 
                 {/* Overlaid Animated Hair in Modal */}
                 {selectedScene === 'photometer' && (

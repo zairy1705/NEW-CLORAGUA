@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { WaterSystem, UserGuardianProfile, SurveillanceRecord, UserProfileAccount } from '../../types';
 import { MainTab } from '../BottomNavigation';
-import { ScientistCartoonStage } from '../ScientistCartoonStage';
 import { ShowcaseCardAnimation } from '../ShowcaseCardAnimation';
 import { ScientistImageModal, ScientistImageModalData } from '../modals/ScientistImageModal';
 import { TropicalBgmPlayer } from '../TropicalBgmPlayer';
+import { ScientistAdvicePopup } from '../ScientistAdvicePopup';
 
 interface HomeViewProps {
   systems: WaterSystem[];
@@ -35,27 +35,29 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onAddNewSystem,
   onOpenDpdCamera,
 }) => {
-  // Video & Water hero state
+  // Video hero state
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
-  const [heroMode, setHeroMode] = useState<'cartoon_animation' | 'photometer' | 'purification' | 'greeting' | 'custom_video'>('photometer');
+  const [isAdviceOpen, setIsAdviceOpen] = useState(true);
+  const [advicePosition, setAdvicePosition] = useState<'bottom-right' | 'bottom-left'>('bottom-right');
   const [selectedImageModal, setSelectedImageModal] = useState<ScientistImageModalData | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  // Auto-play video on mount and state changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+      videoRef.current.play().catch((err) => {
+        console.log('Autoplay handled:', err);
+      });
+    }
+  }, [customVideoUrl, isMuted]);
+
   const totalWaterVolume = systems.reduce((acc, s) => acc + s.currentVolumeLiters, 0);
   const activeSystemsCount = systems.filter((s) => s.operationalStatus === 'active').length;
   const alertSystemsCount = systems.filter((s) => s.operationalStatus === 'alert').length;
-
-  const triggerHeroWaterSplash = (e?: React.MouseEvent) => {
-    const x = e ? e.clientX : window.innerWidth / 2;
-    const y = e ? e.clientY : 260;
-    const event = new CustomEvent('app-water-splash', {
-      detail: { x, y, count: 5 },
-    });
-    window.dispatchEvent(event);
-  };
 
   const handleVideoToggle = () => {
     if (videoRef.current) {
@@ -81,155 +83,246 @@ export const HomeView: React.FC<HomeViewProps> = ({
     if (file) {
       const url = URL.createObjectURL(file);
       setCustomVideoUrl(url);
-      setHeroMode('custom_video');
       setIsPlaying(true);
     }
   };
 
   return (
-    <div className="flex flex-col w-full max-w-4xl mx-auto gap-6 pb-28 pt-2">
-      {/* 1. HERO BANNER WITH CLORAGUA CARTOON SCIENTIST ANIMATION */}
-      <section className="relative w-full rounded-3xl overflow-hidden shadow-[0_16px_40px_-10px_rgba(0,103,125,0.30)] border border-white/60 bg-gradient-to-b from-[#003643] via-[#004e5f] to-[#001f27] text-white">
-        {heroMode === 'custom_video' && customVideoUrl ? (
-          <div className="relative w-full aspect-video sm:max-h-[520px] overflow-hidden flex items-center justify-center bg-black">
-            <video
-              ref={videoRef}
-              src={customVideoUrl}
-              autoPlay
-              loop
-              muted={isMuted}
-              playsInline
-              className="w-full h-full object-cover"
-              poster="/cloragua_hero.jpg"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-            />
-            {/* Overlay video controls */}
-            <div className="absolute top-3 right-3 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
-              <button
-                type="button"
-                onClick={handleVideoToggle}
-                className="text-white hover:text-cyan-300 transition-colors"
-                title={isPlaying ? 'Pausar' : 'Reproducir'}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {isPlaying ? 'pause' : 'play_arrow'}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={handleMuteToggle}
-                className="text-white hover:text-cyan-300 transition-colors"
-                title={isMuted ? 'Activar sonido' : 'Silenciar'}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {isMuted ? 'volume_off' : 'volume_up'}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setHeroMode('photometer')}
-                className="text-white/80 hover:text-white text-[11px] font-hud font-bold transition-colors ml-1"
-              >
-                Volver a Caricatura
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* High-Fidelity Animated Cartoon Water Scientist Stage */
-          <ScientistCartoonStage
-            activeSceneKey={
-              heroMode === 'photometer'
-                ? 'photometer'
-                : heroMode === 'purification'
-                ? 'purification'
-                : heroMode === 'greeting'
-                ? 'greeting'
-                : heroMode === 'cartoon_animation'
-                ? 'cartoon_classic'
-                : 'photometer'
-            }
-            onSceneChange={(sc) => {
-              if (sc === 'cartoon_classic') setHeroMode('cartoon_animation');
-              else setHeroMode(sc);
-            }}
-            onSplashRequest={triggerHeroWaterSplash}
-            onOpenDosage={() => onNavigateTab('dosis')}
-            onOpenDpdCamera={onOpenDpdCamera}
-            className="w-full"
+    <div className="flex flex-col w-full max-w-5xl mx-auto gap-6 pb-28 pt-1">
+      {/* 1. HERO VIDEO BANNER - CLORAGUA OFFICIAL ANIMATED CHARACTER & LOGO AS MAIN PAGE DESIGN */}
+      <section className="relative w-full rounded-3xl overflow-hidden shadow-[0_20px_50px_-10px_rgba(0,103,125,0.4)] border border-cyan-400/40 bg-[#00141a] text-white">
+        {/* Full 16:9 Pristine Video Presentation - Matches exact 1280x720 aspect ratio, zero cropping */}
+        <div className="relative w-full aspect-video overflow-hidden flex items-center justify-center bg-[#00141a]">
+          <video
+            ref={videoRef}
+            src={customVideoUrl || '/cloragua_scientist_animated.mp4'}
+            poster="/cloragua_scientist_animated_poster.jpg"
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            className="w-full h-full object-cover object-center block"
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
           />
-        )}
 
-        {/* Hero Bottom Bar & PROMINENT CLORAGUA TITLE */}
-        <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#002833]/95 backdrop-blur-md border-t border-cyan-500/20">
+          {/* Interactive Floating Scientist Advice Window (Positioned on bottom-right over the desk/laptop, NEVER covering the scientist face or main logo) */}
+          <ScientistAdvicePopup
+            isOpen={isAdviceOpen}
+            onClose={() => setIsAdviceOpen(false)}
+            onNavigateTab={onNavigateTab}
+            onOpenDpdCamera={onOpenDpdCamera}
+            onOpenSolutionPrep={onOpenSolutionPrep}
+            onOpenCalibrate={onOpenCalibrate}
+            position={advicePosition}
+            onTogglePosition={() => setAdvicePosition((p) => (p === 'bottom-right' ? 'bottom-left' : 'bottom-right'))}
+            className={
+              advicePosition === 'bottom-right'
+                ? 'absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20 max-w-[280px] sm:max-w-xs'
+                : 'absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 max-w-[280px] sm:max-w-xs'
+            }
+          />
+
+          {/* Button to reopen scientist presentation and advice if closed (positioned at bottom so it never covers her face) */}
+          {!isAdviceOpen && (
+            <button
+              type="button"
+              onClick={() => setIsAdviceOpen(true)}
+              className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#00212b]/95 hover:bg-[#002f3d] backdrop-blur-md border border-cyan-400/50 text-[#10e7b2] font-hud text-[11px] font-extrabold uppercase shadow-[0_4px_16px_rgba(0,0,0,0.6)] transition-all active:scale-95 cursor-pointer"
+              title="Abrir presentación y consejos de la Científica"
+              id="open-scientist-advice"
+            >
+              <span className="material-symbols-outlined text-[15px] text-[#10e7b2]">science</span>
+              <span>Consejos Científica</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10e7b2] animate-pulse" />
+            </button>
+          )}
+
+          {/* Discreet Video Controls Overlay */}
+          <div className="absolute top-3 right-3 flex items-center gap-2 bg-[#001f27]/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-cyan-400/30 shadow-lg z-10">
+            <button
+              type="button"
+              onClick={handleVideoToggle}
+              className="text-white hover:text-[#10e7b2] transition-colors flex items-center justify-center cursor-pointer p-0.5"
+              title={isPlaying ? 'Pausar video' : 'Reproducir video'}
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isPlaying ? 'pause' : 'play_arrow'}
+              </span>
+            </button>
+            <div className="w-[1px] h-3.5 bg-white/20" />
+            <button
+              type="button"
+              onClick={handleMuteToggle}
+              className="text-white hover:text-[#10e7b2] transition-colors flex items-center justify-center cursor-pointer p-0.5"
+              title={isMuted ? 'Activar sonido' : 'Silenciar'}
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isMuted ? 'volume_off' : 'volume_up'}
+              </span>
+            </button>
+            <div className="w-[1px] h-3.5 bg-white/20" />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-cyan-200 hover:text-white text-[11px] font-hud font-bold transition-colors flex items-center gap-1 cursor-pointer pl-1"
+              title="Cargar video personalizado"
+            >
+              <span className="material-symbols-outlined text-[16px]">upload</span>
+              <span className="hidden sm:inline">Subir Video</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoFileChange}
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        {/* 4 Interactive Pillars Directly Matching the Animation's Graphic Wall */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 p-3 sm:p-4 bg-[#001b22] border-t border-cyan-500/20">
+          <button
+            type="button"
+            onClick={() => onNavigateTab('dosis')}
+            className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-[#002833]/90 hover:bg-[#003747] border border-cyan-500/30 text-left transition-all group cursor-pointer active:scale-95"
+            title="Ir a Dosificación y Cloración Segura"
+          >
+            <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-[#10e7b2] shrink-0 group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[18px]">water_drop</span>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] sm:text-[11.5px] font-hud font-bold text-white truncate">Cloración Segura</div>
+              <div className="text-[9.5px] text-cyan-300/80 truncate">Dosis D.S. 031-SA</div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigateTab('sistemas')}
+            className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-[#002833]/90 hover:bg-[#003747] border border-cyan-500/30 text-left transition-all group cursor-pointer active:scale-95"
+            title="Ir a Red de Sistemas Comunitarios"
+          >
+            <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-[#10e7b2] shrink-0 group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[18px]">groups</span>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] sm:text-[11.5px] font-hud font-bold text-white truncate">Comunidades</div>
+              <div className="text-[9.5px] text-cyan-300/80 truncate">Red de Reservorios</div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigateTab('hud')}
+            className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-[#002833]/90 hover:bg-[#003747] border border-cyan-500/30 text-left transition-all group cursor-pointer active:scale-95"
+            title="Ir a Bio-Telemetría y Calidad del Agua"
+          >
+            <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-[#10e7b2] shrink-0 group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[18px]">verified_user</span>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] sm:text-[11.5px] font-hud font-bold text-white truncate">Calidad del Agua</div>
+              <div className="text-[9.5px] text-cyan-300/80 truncate">0.50 - 2.00 PPM</div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigateTab('registro')}
+            className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-[#002833]/90 hover:bg-[#003747] border border-cyan-500/30 text-left transition-all group cursor-pointer active:scale-95"
+            title="Ir a Bitácora Oficial y Futuro Sostenible"
+          >
+            <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-[#10e7b2] shrink-0 group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[18px]">eco</span>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] sm:text-[11.5px] font-hud font-bold text-white truncate">Futuro Sostenible</div>
+              <div className="text-[9.5px] text-cyan-300/80 truncate">Bitácora & Reportes</div>
+            </div>
+          </button>
+        </div>
+
+        {/* Hero Bottom Bar & PROMINENT OFFICIAL CLORAGUA BRANDING */}
+        <div className="p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#002833] border-t border-cyan-500/30">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center flex-wrap gap-2.5">
-              <span className="text-[28px] sm:text-[34px] font-black tracking-tight text-white font-hud bg-gradient-to-r from-white via-cyan-100 to-[#10e7b2] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(0,180,216,0.6)]">
-                CLORAGUA
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00b4d8] to-[#10e7b2] p-0.5 flex items-center justify-center shadow-md">
+                  <div className="w-full h-full bg-[#002833] rounded-[10px] flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[20px] text-[#10e7b2]">water_drop</span>
+                  </div>
+                </div>
+                <span className="text-[26px] sm:text-[30px] font-black tracking-tight text-white font-hud bg-gradient-to-r from-white via-cyan-100 to-[#10e7b2] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(0,180,216,0.6)]">
+                  CLORAGUA
+                </span>
+              </div>
               <span className="px-2.5 py-1 rounded-full bg-[#10e7b2]/20 border border-[#10e7b2]/60 text-[#10e7b2] font-hud text-[11px] font-extrabold uppercase tracking-wider">
                 D.S. 031-2010-SA
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-cyan-900/60 text-cyan-200 border border-cyan-500/30 text-[10px] font-hud font-bold">
-                Vigilancia & Cloración
+                Agua Segura para Comunidades
               </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAdviceOpen(true);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-2.5 py-0.5 rounded-full bg-cyan-950 hover:bg-cyan-900 text-[#10e7b2] border border-[#10e7b2]/40 text-[10px] font-hud font-bold flex items-center gap-1 cursor-pointer transition-colors active:scale-95"
+                title="Abrir presentación y consejos de la Científica"
+              >
+                <span className="material-symbols-outlined text-[13px]">science</span>
+                <span>Consejos Científica</span>
+              </button>
             </div>
-            <p className="text-[12.5px] text-cyan-100/90 max-w-xl leading-relaxed">
-              Plataforma guiada paso a paso para cálculo de volumen, dosificación teórica de hipoclorito, control fotométrico de cloro residual libre y emisión de reportes técnicos oficiales.
+            <p className="text-[12px] sm:text-[12.5px] text-cyan-100/90 max-w-xl leading-relaxed">
+              Plataforma oficial guiada para cálculo de volumen, dosificación teórica de hipoclorito, control fotométrico de cloro libre residual (0.5 a 2.0 ppm) y emisión de reportes técnicos oficiales.
             </p>
           </div>
 
-          <div className="flex items-center flex-wrap gap-2 w-full sm:w-auto">
+          <div className="flex items-center flex-wrap gap-2.5 w-full md:w-auto">
             {onOpenDpdCamera && (
               <button
                 onClick={onOpenDpdCamera}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-200 border border-cyan-400/50 font-hud text-[12px] font-extrabold uppercase shadow-sm active:scale-95 transition-all cursor-pointer"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-200 border border-cyan-400/50 font-hud text-[12px] font-extrabold uppercase shadow-sm active:scale-95 transition-all cursor-pointer"
                 type="button"
                 title="Abrir Cámara Escáner DPD"
               >
                 <span className="material-symbols-outlined text-[18px] text-[#10e7b2]">photo_camera</span>
-                <span>Escanear con Cámara DPD</span>
+                <span>Escanear Fotómetro</span>
               </button>
             )}
             <button
               onClick={() => onNavigateTab('dosis')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] hover:opacity-95 text-[#002116] font-hud text-[12px] font-extrabold uppercase shadow-[0_4px_16px_rgba(0,180,216,0.35)] active:scale-95 transition-all cursor-pointer"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] hover:opacity-95 text-[#002116] font-hud text-[12px] font-extrabold uppercase shadow-[0_4px_16px_rgba(0,180,216,0.35)] active:scale-95 transition-all cursor-pointer"
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">play_arrow</span>
-              <span>Calcular Dosis Ahora</span>
+              <span>Calcular Dosis</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* INTERACTIVE CARTOON SCIENTIST COMPANION BANNER */}
-      <section className="bg-gradient-to-r from-[#004e5f]/15 via-white to-cyan-50/50 rounded-2xl p-4 sm:p-5 shadow-sm border border-cyan-200/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div
-            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-[#00b4d8] shadow-md shrink-0 bg-[#001f27] group cursor-pointer"
-            onClick={() => setHeroMode('greeting')}
-            title="Ver imagen de la científica guardiana"
-          >
-            <img
-              src="/cloragua_guardian_greeting.jpg"
-              alt="Científica Guardiana CLORAGUA"
-              className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-300"
-            />
-            <div className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-[#10e7b2] border-2 border-white animate-pulse" />
+      {/* PROTOCOLOS Y HERRAMIENTAS RÁPIDAS DE CAMPO */}
+      <section className="bg-gradient-to-r from-[#004e5f]/10 via-white to-cyan-50/60 rounded-2xl p-4 sm:p-5 shadow-sm border border-cyan-200/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00b4d8] to-[#00677d] flex items-center justify-center text-white shadow-sm shrink-0">
+            <span className="material-symbols-outlined text-[22px]">health_and_safety</span>
           </div>
-
           <div className="flex flex-col">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-hud text-[13px] sm:text-[14px] font-extrabold text-[#00677d]">
-                Científica Virtual CLORAGUA
+                Protocolos Técnicos de Cloración
               </span>
               <span className="px-2 py-0.5 rounded-full bg-[#00b4d8]/15 text-[#0077b6] text-[10px] font-hud font-bold border border-[#00b4d8]/40 uppercase">
-                Asistente de Calidad
+                Calidad Vigilada
               </span>
             </div>
-            <p className="text-[12px] text-slate-600 mt-1 max-w-xl leading-relaxed">
-              «¡Hola, Operador y Guardián del Agua! Te acompaño en la preparación de la solución madre, el cálculo de hipoclorito y la vigilancia sanitaria para garantizar agua 100% segura (0.5 a 2.0 ppm).»
+            <p className="text-[12px] text-slate-600 mt-0.5 max-w-xl leading-relaxed">
+              Herramientas directas para preparación de solución madre, calibración de gotero por aforo y lectura óptica DPD.
             </p>
           </div>
         </div>
@@ -238,7 +331,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {onOpenDpdCamera && (
             <button
               onClick={onOpenDpdCamera}
-              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] text-[#00212b] font-hud text-[11px] font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95 hover:opacity-95"
+              className="flex-1 md:flex-none px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#10e7b2] text-[#00212b] font-hud text-[11px] font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95 hover:opacity-95"
               type="button"
               title="Abrir escáner con cámara para fotómetro DPD"
             >
@@ -248,7 +341,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           )}
           <button
             onClick={() => onOpenSolutionPrep()}
-            className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-cyan-50/80 text-[#00677d] border border-cyan-200 font-hud text-[11px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
+            className="flex-1 md:flex-none px-3.5 py-2.5 rounded-xl bg-white hover:bg-cyan-50/80 text-[#00677d] border border-cyan-200 font-hud text-[11px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">science</span>
@@ -256,7 +349,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
           <button
             onClick={() => onOpenCalibrate()}
-            className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-[#00677d] hover:bg-[#005263] text-white font-hud text-[11px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+            className="flex-1 md:flex-none px-3.5 py-2.5 rounded-xl bg-[#00677d] hover:bg-[#005263] text-white font-hud text-[11px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">tune</span>
@@ -309,10 +402,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   modeKey: 'photometer',
                 })
               }
-              onSetBanner={() => {
-                setHeroMode('photometer');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onSetBanner={() =>
+                setSelectedImageModal({
+                  title: 'Medición Fotométrica & Reactivo DPD',
+                  subtitle: 'Fotómetro Digital Portátil (0.50 - 2.00 ppm)',
+                  desc: 'Inspección óptica de precisión con tubo de ensayo y reactivo DPD en polvo. La reacción cromática rosada cuantifica el cloro residual libre activo protegiendo la salud comunitaria.',
+                  url: '/cloragua_photometer_chemist.jpg',
+                  badge: 'FOTÓMETRO DPD',
+                  modeKey: 'photometer',
+                })
+              }
             />
 
             <div className="p-4 flex flex-col gap-2.5 flex-1 justify-between">
@@ -376,10 +475,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   modeKey: 'purification',
                 })
               }
-              onSetBanner={() => {
-                setHeroMode('purification');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onSetBanner={() =>
+                setSelectedImageModal({
+                  title: 'Purificación & Dosificación Continua',
+                  subtitle: 'Columna de Cloración & Muestreo In Situ',
+                  desc: 'Columna de contacto hidrostático y dosificador de hipoclorito a flujo constante por goteo calibrado. Asegura desinfección homogénea de reservorios y redes comunitarias.',
+                  url: '/cloragua_purification_column.jpg',
+                  badge: 'COLUMNA DE FLUJO',
+                  modeKey: 'purification',
+                })
+              }
             />
 
             <div className="p-4 flex flex-col gap-2.5 flex-1 justify-between">
@@ -443,10 +548,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   modeKey: 'greeting',
                 })
               }
-              onSetBanner={() => {
-                setHeroMode('greeting');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onSetBanner={() =>
+                setSelectedImageModal({
+                  title: 'Guardián & Asistente Científica',
+                  subtitle: 'Vigilancia Sanitaria Oficial D.S. 031-2010-SA',
+                  desc: 'Supervisión técnica paso a paso para operadores comunales JASS: fórmulas normativas de hipoclorito de calcio (65-70%) y sodio, tiempo de contacto y registro de bitácora.',
+                  url: '/cloragua_guardian_greeting.jpg',
+                  badge: 'CIENTÍFICA VIRTUAL',
+                  modeKey: 'greeting',
+                })
+              }
             />
 
             <div className="p-4 flex flex-col gap-2.5 flex-1 justify-between">
@@ -914,8 +1025,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <ScientistImageModal
         data={selectedImageModal}
         onClose={() => setSelectedImageModal(null)}
-        onSetBanner={(mode) => {
-          setHeroMode(mode);
+        onSetBanner={() => {
+          setSelectedImageModal(null);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />

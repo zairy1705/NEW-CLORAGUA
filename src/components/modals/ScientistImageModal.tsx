@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
-export type ScientistSceneKey = 'photometer' | 'purification' | 'greeting';
+export type ScientistSceneKey = 'animated_scientist' | 'photometer' | 'purification' | 'greeting';
 
 export interface ScientistImageModalData {
   title: string;
@@ -447,14 +447,27 @@ export const ScientistImageModal: React.FC<ScientistImageModalProps> = ({
           />
 
           {/* Unclipped Image Container: fits 100% inside maximum viewport height without cropping! */}
-          <div className="relative z-10 w-full max-h-[50vh] sm:max-h-[56vh] aspect-square flex items-center justify-center animate-scientist-breath">
-            {/* The 1024x1024 Complete Illustration */}
-            <img
-              src={data.url}
-              alt={data.title}
-              className="w-full h-full max-h-[50vh] sm:max-h-[56vh] object-contain object-center drop-shadow-[0_12px_32px_rgba(0,0,0,0.8)]"
-              referrerPolicy="no-referrer"
-            />
+          <div className="relative z-10 w-full max-h-[50vh] sm:max-h-[56vh] aspect-video sm:aspect-square flex items-center justify-center animate-scientist-breath">
+            {data.url.endsWith('.mp4') || data.modeKey === 'animated_scientist' ? (
+              <video
+                src={data.url.endsWith('.mp4') ? data.url : '/cloragua_scientist_animated.mp4'}
+                poster="/cloragua_scientist_animated_poster.jpg"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                className="w-full h-full max-h-[50vh] sm:max-h-[56vh] object-contain object-center drop-shadow-[0_12px_32px_rgba(0,0,0,0.8)] rounded-xl"
+              />
+            ) : (
+              /* The 1024x1024 Complete Illustration */
+              <img
+                src={data.url}
+                alt={data.title}
+                className="w-full h-full max-h-[50vh] sm:max-h-[56vh] object-contain object-center drop-shadow-[0_12px_32px_rgba(0,0,0,0.8)]"
+                referrerPolicy="no-referrer"
+              />
+            )}
 
             {/* Loop Overlays: Hair Motion in Photometer Scene */}
             {data.modeKey === 'photometer' && (
